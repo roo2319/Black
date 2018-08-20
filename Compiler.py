@@ -58,22 +58,33 @@ def sub(operand):
 
 
 def jump(operand):
-    global pointers
     try:
-        pointers.append(stack.pop(0), stack.pop(0))
+        coords = (stack.pop(0), stack.pop(0))
+        pointers.append(coords)
+        callstack.append(coords)
     except IndexError:
         print "Tried to pop empty stack"
         exit(1)
 
-# transforms current coordinates to have opcode operrand and operand stack.pop()
+# Returns to top of callstack, Should be used in pixel with no outgoing pointers
+
+
+def ret(operand):
+    try:
+        pointers.append(callstack.pop(0))
+    except IndexError:
+        print "Tried to pop an empty call stack"
+        exit(1)
+
+
+# Transforms current coordinates to have opcode operrand and operand stack.pop()
 
 
 def transform(operand):
-    global x, y, pix
     pix[(x, y)] = (operand, stack.pop(0), pix[(x, y)][3])
 
 
-functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub, 5: jump, 6: transform}
+functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub, 5: jump, 6: ret, 7: transform}
 
 
 def operate(opcode, operand):
@@ -88,13 +99,11 @@ while pointers != []:
     global x, y
     x, y = pointers.pop(0)
     current = pix[x, y]
-
-
     operate(current[0], current[1])
 
     # Adds new pointers based of the B in RGB code.
     # 1111 = WSEN
-    
+
     if current[2] & 0b1:
         pointers.append((x, y-1))
     if current[2] >> 1 & 0b1:
@@ -103,5 +112,3 @@ while pointers != []:
         pointers.append((x, y+1))
     if current[2] >> 3 & 0b1:
         pointers.append((x-1, y))
-
-
