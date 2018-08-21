@@ -1,3 +1,4 @@
+from __future__ import print_function
 from PIL import Image
 
 condreg = 0
@@ -24,83 +25,203 @@ def nop(operand):
 
 
 def push(operand):
-    stack.insert(0, operand)
+    stack.append(operand)
 
 # Pops and prints the first element of the stack, Prints as ascii char if non-zero operand
 
 
 def pop(operand):
-    out = stack.pop(0)
+    out = stack.pop()
     if operand != 0:
-        print chr(out)
+        print (chr(out), end='')
     else:
-        print out
+        print (out, end='')
 
 # Adds top elements of stack unless given non zero arg
 
 
 def add(operand):
     if operand == 0:
-        stack.insert(0, stack.pop(0) + stack.pop(0))
+        stack.append(stack.pop() + stack.pop())
     else:
-        stack.insert(0, stack.pop(0) + operand)
+        stack.append(stack.pop() + operand)
 
 # Subtracts top elements of stack, unless given non zero arg
 
 
 def sub(operand):
     if operand == 0:
-        stack.insert(0, stack.pop(0) - stack.pop(0))
+        stack.append(stack.pop() - stack.pop())
     else:
-        stack.insert(0, stack.pop(0) - operand)
+        stack.append(stack.pop() - operand)
 
-# Jumps to (stack[0],stack[1])
+# Unconditional jump to (stack[0],stack[1])
 
 
 def jump(operand):
     try:
-        coords = (stack.pop(0), stack.pop(0))
+        coords = (stack.pop(), stack.pop())
         pointers.append(coords)
         callstack.append(coords)
     except IndexError:
-        print "Tried to pop empty stack"
+        print ("Tried to pop empty stack")
         exit(1)
+
+# Jumps if stack.pop() == operand
+
+
+def condjump(operand):
+    try:
+        if stack.pop() == operand:
+            coords = (stack.pop(), stack.pop())
+            pointers.append(coords)
+            callstack.append(coords)
+        else:
+            stack.pop()
+            stack.pop()
+    except IndexError:
+        print ("Tried to pop empty stack")
+        exit(1)
+
 
 # Returns to top of callstack, Should be used in pixel with no outgoing pointers
 
 
 def ret(operand):
     try:
-        pointers.append(callstack.pop(0))
+        pointers.append(callstack.pop())
     except IndexError:
-        print "Tried to pop an empty call stack"
+        print ("Tried to pop an empty call stack")
         exit(1)
 
+# Kills pointer if stack.pop() == operand
 
-# Transforms current coordinates to have opcode operrand and operand stack.pop()
+
+def condkill(operand):
+    try:
+        if stack.pop() == operand:
+            pix[(x, y)] = pix[(x,y)][0],pix[(x,y)][1],0
+    except IndexError:
+        print ("Tried to pop empty stack")
+        exit(1)
+
+# Transforms current coordinates to have opcode operand and operand stack.pop()
 
 
 def transform(operand):
-    pix[(x, y)] = (operand, stack.pop(0), pix[(x, y)][3])
+    pix[(x, y)] = (operand, stack.pop(), pix[(x, y)][2])
+
+# Reads input from user and pushes to stack
 
 
-functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub, 5: jump, 6: ret, 7: transform}
+def inp(operand):
+    userin = ord(raw_input("? ")[0])
+    if type(userin) != int:
+        print ("INVALID INPUT! Please input an ascii character")
+        exit(1)
+    else:
+        stack.append(userin)
+
+# Duplicates top element of stack
+
+
+def dup(operand):
+    stack.append(stack[len(stack)-1])
+
+# Multiplies top elements of stack unless given a non-zero operand
+
+
+def mul(operand):
+    if operand == 0:
+        stack.append(stack.pop() * stack.pop())
+    else:
+        stack.append(stack.pop() * operand)
+
+# Removes outgoing pointers if the stack is empty
+
+
+def emptykill(operand):
+    if stack == []:
+        pix[(x,y)] = pix[(x,y)][0],pix[(x,y)][1],0
+
+# Reverses the stack
+
+
+def reverse(operand):
+    stack.reverse()
+
+# Rotates stack such that n1     n3
+#                         n2  -> n1
+#                         n3     n2
+
+
+def rot(operand):
+    try:
+        n1 = stack.pop()
+        n2 = stack.pop()
+        n3 = stack.pop()
+        stack.extend([n2, n1, n3])
+    except:
+        print ("Rotate Error")
+        exit(1)
+
+# Makes a copy of the second item and pushes it to the top
+
+
+def over(operand):
+    try:
+        n1 = stack.pop()
+        n2 = stack.pop()
+        stack.extend([n2, n1, n2])
+    except:
+        print ("Over Error")
+        exit(1)
+
+# Swaps the top two elements of the stack
+
+
+def swap(operand):
+    try:
+        n1 = stack.pop()
+        n2 = stack.pop()
+        stack.extend([n1, n2])
+    except:
+        print ("Swap Error")
+        exit(1)
+
+# Removes the top of the stack
+
+
+def drop(operand):
+    try:
+        stack.pop()
+    except IndexError:
+        print ("Tried to drop empty stack")
+
+
+functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub,
+             5: jump, 6: condjump, 7: ret, 8: condkill,
+             9: transform, 10: inp, 11: dup, 12: mul,
+             13: emptykill, 14: reverse, 15: rot, 16: over,
+             17: swap, 18: drop}
 
 
 def operate(opcode, operand):
     try:
         functions[opcode](operand)
     except KeyError:
-        print "R value not valid!"
+        
+        print ("R value {0} not valid! (instruction at {1},{2})".format(opcode,x,y))
         exit(1)
 
 
 while pointers != []:
-    global x, y
     x, y = pointers.pop(0)
     current = pix[x, y]
     operate(current[0], current[1])
 
+    #refresh current in case changed by kill
+    current = pix[x, y]
     # Adds new pointers based of the B in RGB code.
     # 1111 = WSEN
 
