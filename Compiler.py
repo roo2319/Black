@@ -1,7 +1,6 @@
 from __future__ import print_function
 from PIL import Image
 
-condreg = 0
 stack = []
 
 # single callstack so you really should have functions terminate in call order
@@ -13,19 +12,19 @@ pointers = [(0, 0)]
 name = "test.png"
 im = Image.open(name)
 pix = im.load()
-width, height = im.size
 
 # No operation
 
 
 def nop(operand):
-    pass
+    getpointers()
 
 # Pushes operand to the stack
 
 
 def push(operand):
     stack.append(operand)
+    getpointers()
 
 # Pops and prints the first element of the stack, Prints as ascii char if non-zero operand
 
@@ -33,9 +32,15 @@ def push(operand):
 def pop(operand):
     out = stack.pop()
     if operand != 0:
-        print (chr(out), end='')
+        try:
+            print (chr(out), end='')
+            getpointers()
+        except:
+            print ("Conversion error from int to char in pop")
+            exit(1)
     else:
         print (out, end='')
+        getpointers()
 
 # Adds top elements of stack unless given non zero arg
 
@@ -43,8 +48,10 @@ def pop(operand):
 def add(operand):
     if operand == 0:
         stack.append(stack.pop() + stack.pop())
+        getpointers()
     else:
         stack.append(stack.pop() + operand)
+        getpointers()
 
 # Subtracts top elements of stack, unless given non zero arg
 
@@ -52,8 +59,10 @@ def add(operand):
 def sub(operand):
     if operand == 0:
         stack.append(stack.pop() - stack.pop())
+        getpointers()
     else:
         stack.append(stack.pop() - operand)
+        getpointers()
 
 # Unconditional jump to (stack[0],stack[1])
 
@@ -63,6 +72,7 @@ def jump(operand):
         coords = (stack.pop(), stack.pop())
         pointers.append(coords)
         callstack.append(coords)
+        getpointers()
     except IndexError:
         print ("Tried to pop empty stack")
         exit(1)
@@ -76,9 +86,11 @@ def condjump(operand):
             coords = (stack.pop(), stack.pop())
             pointers.append(coords)
             callstack.append(coords)
+            getpointers()
         else:
             stack.pop()
             stack.pop()
+            getpointers()
     except IndexError:
         print ("Tried to pop empty stack")
         exit(1)
@@ -90,6 +102,7 @@ def condjump(operand):
 def ret(operand):
     try:
         pointers.append(callstack.pop())
+        getpointers()
     except IndexError:
         print ("Tried to pop an empty call stack")
         exit(1)
@@ -100,7 +113,9 @@ def ret(operand):
 def condkill(operand):
     try:
         if stack.pop() == operand:
-            pix[(x, y)] = pix[(x,y)][0],pix[(x,y)][1],0
+            pass
+        else:
+            getpointers()
     except IndexError:
         print ("Tried to pop empty stack")
         exit(1)
@@ -110,23 +125,39 @@ def condkill(operand):
 
 def transform(operand):
     pix[(x, y)] = (operand, stack.pop(), pix[(x, y)][2])
+    getpointers()
 
 # Reads input from user and pushes to stack
 
 
-def inp(operand):
+def inpchar(operand):
     userin = ord(raw_input("? ")[0])
     if type(userin) != int:
         print ("INVALID INPUT! Please input an ascii character")
         exit(1)
     else:
         stack.append(userin)
+        getpointers()
+
+# Reads input from user as an integer and pushes to stack
+
+
+def inpint(operand):
+    userin = input("? ")
+    if type(userin) != int:
+        print ("INVALID INPUT! Please input an ascii character")
+        exit(1)
+    else:
+        stack.append(userin)
+        getpointers()
+
 
 # Duplicates top element of stack
 
 
 def dup(operand):
     stack.append(stack[len(stack)-1])
+    getpointers()
 
 # Multiplies top elements of stack unless given a non-zero operand
 
@@ -134,21 +165,26 @@ def dup(operand):
 def mul(operand):
     if operand == 0:
         stack.append(stack.pop() * stack.pop())
+        getpointers()
     else:
         stack.append(stack.pop() * operand)
+        getpointers()
 
 # Removes outgoing pointers if the stack is empty
 
 
 def emptykill(operand):
     if stack == []:
-        pix[(x,y)] = pix[(x,y)][0],pix[(x,y)][1],0
-
+        pass
+    else:
+        getpointers()
+        
 # Reverses the stack
 
 
 def reverse(operand):
     stack.reverse()
+    getpointers()
 
 # Rotates stack such that n1     n3
 #                         n2  -> n1
@@ -161,6 +197,7 @@ def rot(operand):
         n2 = stack.pop()
         n3 = stack.pop()
         stack.extend([n2, n1, n3])
+        getpointers()
     except:
         print ("Rotate Error")
         exit(1)
@@ -173,6 +210,7 @@ def over(operand):
         n1 = stack.pop()
         n2 = stack.pop()
         stack.extend([n2, n1, n2])
+        getpointers()
     except:
         print ("Over Error")
         exit(1)
@@ -185,6 +223,7 @@ def swap(operand):
         n1 = stack.pop()
         n2 = stack.pop()
         stack.extend([n1, n2])
+        getpointers()
     except:
         print ("Swap Error")
         exit(1)
@@ -195,32 +234,63 @@ def swap(operand):
 def drop(operand):
     try:
         stack.pop()
+        getpointers()
     except IndexError:
         print ("Tried to drop empty stack")
+        exit(1)
 
+#Waits for stack to equal operand before proceeding
+
+
+def waitfor(operand):
+    try:
+        top = stack.pop()
+        if top == operand:
+            getpointers()
+        else:
+            pointers.append((x,y))
+        stack.append(top)
+            
+    except IndexError:
+        print ("Tried to wait on an empty stack")
+        exit(1)
+
+#Kills if stack has one element
+
+def singlekill(operand):
+    if len(stack) == 1:
+        pass
+    else:
+        getpointers()
+
+# Runs if it is the last pointer
+
+def runifonly(operand):
+    if len(pointers) == 0:
+        getpointers()
+    else:
+        pointers.append((x,y))
+    
 
 functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub,
              5: jump, 6: condjump, 7: ret, 8: condkill,
-             9: transform, 10: inp, 11: dup, 12: mul,
+             9: transform, 10: inpchar, 11: dup, 12: mul,
              13: emptykill, 14: reverse, 15: rot, 16: over,
-             17: swap, 18: drop}
+             17: swap, 18: drop, 19: inpint, 20: waitfor,
+             21: singlekill, 22:runifonly}
 
 
 def operate(opcode, operand):
     try:
         functions[opcode](operand)
     except KeyError:
-        
-        print ("R value {0} not valid! (instruction at {1},{2})".format(opcode,x,y))
+
+        print ("R value {0} not valid! (instruction at {1},{2})".format(
+            opcode, x, y))
         exit(1)
 
-
-while pointers != []:
-    x, y = pointers.pop(0)
-    current = pix[x, y]
-    operate(current[0], current[1])
-
-    #refresh current in case changed by kill
+def getpointers():
+    # refresh current in case changed by kill
     current = pix[x, y]
     # Adds new pointers based of the B in RGB code.
     # 1111 = WSEN
@@ -233,3 +303,11 @@ while pointers != []:
         pointers.append((x, y+1))
     if current[2] >> 3 & 0b1:
         pointers.append((x-1, y))
+
+
+while pointers != []:
+    x, y = pointers.pop(0)
+    current = pix[x, y]
+    operate(current[0], current[1])
+
+    

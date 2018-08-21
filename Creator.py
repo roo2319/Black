@@ -4,14 +4,58 @@ from PIL import Image
 #             5: jump, 6: condjump, 7: ret, 8: condkill,
 #             9: transform, 10: inp, 11: dup, 12: mul,
 #             13: emptykill, 14: reverse, 15: rot, 16: over,
-#             17: swap, 18: drop}
+#             17: swap, 18: drop, 19: inpint, 20: waitfor,
+#             21: singlekill, 22:runifonly}
 # 1111 = WSEN
 
-im = Image.open('blank.jpg')
+im = Image.open('blank.png')
 pix = im.load()
 
 
-pix[0,0] = (0,0,0)
+pix[0,0] = (1,32,2)
+pix[1,0] = (1,32,2)
+pix[2,0] = (5,0,2)
+pix[3,0] = (22,0,2)
+pix[4,0] = (0,0,6)
+pix[4,1] = (22,0,4)
+pix[4,2] = (2,0,0)
+pix[5,0] = (21,0,2)
+pix[6,0] = (12,0,4)
+pix[6,1] = (0,0,8)
+pix[5,1] = (0,0,1)
+
+pix[32,32] = (0,0,4)
+pix[32,33] = (19,0,14)
+
+pix[31,33] = (0,0,8)
+pix[30,33] = (11,0,8)
+pix[29,33] = (4,1,8)
+pix[28,33] = (11,0,4)
+pix[28,34] = (8,0,2)
+pix[29,34] = (11,0,2)
+pix[30,34] = (8,1,2)
+pix[31,34] = (0,0,1)
+
+pix[33,33] = (11,0,2)
+pix[34,33] = (4,1,2)
+pix[35,33] = (0,0,2)
+pix[36,33] = (11,0,4)
+pix[36,34] = (8,0,8)
+pix[35,34] = (11,0,8)
+pix[34,34] = (8,1,8)
+pix[33,34] = (0,0,1)
+
+
+
+pix[32,34] = (20,1,4)
+pix[32,35] = (0,0,4)
+pix[32,36] = (0,0,4)
+pix[32,37] = (0,0,4)
+pix[32,38] = (18,0,0)
+
+
+
+
 
 
 im.save('test.png',quality = 95)
