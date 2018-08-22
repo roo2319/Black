@@ -45,5 +45,6 @@ Exit direction is the direction that the program flows. Execution starts in the 
 ## Doesn't this all lead to horrible concurrency issues?
 Not if you program around it?
 
+## Fine, What are the dependencies?
 
-
+All that you need is a python installation with PIL or Pillow
