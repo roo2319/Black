@@ -156,7 +156,8 @@ def inpint(operand):
 
 
 def dup(operand):
-    stack.append(stack[len(stack)-1])
+    last = stack.pop()
+    stack.extend([last,last])
     getpointers()
 
 # Multiplies top elements of stack unless given a non-zero operand
@@ -199,7 +200,7 @@ def rot(operand):
         stack.extend([n2, n1, n3])
         getpointers()
     except:
-        print ("Rotate Error")
+        print ("Rotate Error on stack {0}, at {1},{2}".format(stack,x,y))
         exit(1)
 
 # Makes a copy of the second item and pushes it to the top
@@ -270,6 +271,8 @@ def runifonly(operand):
         getpointers()
     else:
         pointers.append((x,y))
+
+
     
 
 functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub,
