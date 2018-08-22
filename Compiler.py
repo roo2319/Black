@@ -8,8 +8,7 @@ stack = []
 callstack = []
 
 pointers = [(0, 0)]
-#name = raw_input("What is the name of your code? ")
-name = "test.png"
+name = raw_input("What is the name of your program? ")
 im = Image.open(name)
 pix = im.load()
 
