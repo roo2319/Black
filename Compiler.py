@@ -64,7 +64,7 @@ def sub(operand):
         stack.append(stack.pop() - operand)
         getpointers()
 
-# Unconditional jump to (stack[0],stack[1])
+# Unconditional jump to (stack[0],stack[1]), destroys top 2 elements of stack
 
 
 def jump(operand):
@@ -77,7 +77,7 @@ def jump(operand):
         print ("Tried to pop empty stack")
         exit(1)
 
-# Jumps if stack.pop() == operand
+# Jumps if stack.pop() == operand, destroys top 3 elements of stack
 
 
 def condjump(operand):
@@ -107,7 +107,7 @@ def ret(operand):
         print ("Tried to pop an empty call stack")
         exit(1)
 
-# Kills pointer if stack.pop() == operand
+# Kills pointer if stack.pop() == operand, Destroys top of stack
 
 
 def condkill(operand):
@@ -145,7 +145,7 @@ def inpchar(operand):
 def inpint(operand):
     userin = input("? ")
     if type(userin) != int:
-        print ("INVALID INPUT! Please input an ascii character")
+        print ("INVALID INPUT! Please input an integer")
         exit(1)
     else:
         stack.append(userin)
@@ -157,7 +157,7 @@ def inpint(operand):
 
 def dup(operand):
     last = stack.pop()
-    stack.extend([last,last])
+    stack.extend([last, last])
     getpointers()
 
 # Multiplies top elements of stack unless given a non-zero operand
@@ -179,7 +179,7 @@ def emptykill(operand):
         pass
     else:
         getpointers()
-        
+
 # Reverses the stack
 
 
@@ -200,7 +200,7 @@ def rot(operand):
         stack.extend([n2, n1, n3])
         getpointers()
     except:
-        print ("Rotate Error on stack {0}, at {1},{2}".format(stack,x,y))
+        print ("Rotate Error on stack {0}, at {1},{2}".format(stack, x, y))
         exit(1)
 
 # Makes a copy of the second item and pushes it to the top
@@ -240,7 +240,7 @@ def drop(operand):
         print ("Tried to drop empty stack")
         exit(1)
 
-#Waits for stack to equal operand before proceeding
+# Waits for stack to equal operand before proceeding
 
 
 def waitfor(operand):
@@ -249,14 +249,15 @@ def waitfor(operand):
         if top == operand:
             getpointers()
         else:
-            pointers.append((x,y))
+            pointers.append((x, y))
         stack.append(top)
-            
+
     except IndexError:
         print ("Tried to wait on an empty stack")
         exit(1)
 
-#Kills if stack has one element
+# Kills if stack has one element
+
 
 def singlekill(operand):
     if len(stack) == 1:
@@ -266,21 +267,20 @@ def singlekill(operand):
 
 # Runs if it is the last pointer
 
+
 def runifonly(operand):
     if len(pointers) == 0:
         getpointers()
     else:
-        pointers.append((x,y))
+        pointers.append((x, y))
 
-
-    
 
 functions = {0: nop, 1: push, 2: pop, 3: add, 4: sub,
              5: jump, 6: condjump, 7: ret, 8: condkill,
              9: transform, 10: inpchar, 11: dup, 12: mul,
              13: emptykill, 14: reverse, 15: rot, 16: over,
              17: swap, 18: drop, 19: inpint, 20: waitfor,
-             21: singlekill, 22:runifonly}
+             21: singlekill, 22: runifonly}
 
 
 def operate(opcode, operand):
@@ -291,6 +291,7 @@ def operate(opcode, operand):
         print ("R value {0} not valid! (instruction at {1},{2})".format(
             opcode, x, y))
         exit(1)
+
 
 def getpointers():
     # refresh current in case changed by kill
@@ -312,5 +313,3 @@ while pointers != []:
     x, y = pointers.pop(0)
     current = pix[x, y]
     operate(current[0], current[1])
-
-    
