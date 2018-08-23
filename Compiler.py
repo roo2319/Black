@@ -8,7 +8,8 @@ stack = []
 callstack = []
 
 pointers = [(0, 0)]
-name = raw_input("What is the name of your program? ")
+#name = raw_input("What is the name of your program? ")
+name = 'test.png'
 im = Image.open(name)
 pix = im.load()
 
@@ -310,5 +311,9 @@ def getpointers():
 
 while pointers != []:
     x, y = pointers.pop(0)
-    current = pix[x, y]
+    try:
+        current = pix[x, y]
+    except IndexError:
+        print ("Coords out of range ({0},{1})".format(x,y))
+        exit(1)
     operate(current[0], current[1])
