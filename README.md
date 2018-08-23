@@ -10,7 +10,7 @@ R|G|B
 
 OPCODE|OPERAND|EXIT DIRECTION
 
-The operand can range from 0 to 22, the opcode 0 to 255 and the exit direction is effective at 0 to 15, but the high bits of blue are unreserved and can be used as seen fit.
+The opcode can range from 0 to 22, the operand 0 to 255 and the exit direction is effective at 0 to 15, but the high bits of blue are unreserved and can be used as seen fit.
 
 ## What function's are supported?
 
