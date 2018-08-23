@@ -96,13 +96,21 @@ def condjump(operand):
         exit(1)
 
 
-# Returns to top of callstack, Should be used in pixel with no outgoing pointers
+# Functions like getpointers, But takes operand as B and top of call stack as location.
 
 
 def ret(operand):
     try:
-        pointers.append(callstack.pop())
-        getpointers()
+        location = callstack.pop()
+        if operand & 0b1:
+            pointers.append((location[0], location[1]-1))
+        if operand >> 1 & 0b1:
+            pointers.append((location[0]+1, location[1]))
+        if operand >> 2 & 0b1:
+            pointers.append((location[0], location[1]+1))
+        if operand >> 3 & 0b1:
+            pointers.append((location[0]-1, location[1]))
+            
     except IndexError:
         print ("Tried to pop an empty call stack")
         exit(1)
