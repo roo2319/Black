@@ -139,7 +139,7 @@ def transform(operand):
 
 
 def inpchar(operand):
-    userin = ord(raw_input("? ")[0])
+    userin = ord(input("? ")[0])
     if type(userin) != int:
         print ("INVALID INPUT! Please input an ascii character")
         exit(1)
@@ -151,7 +151,7 @@ def inpchar(operand):
 
 
 def inpint(operand):
-    userin = input("? ")
+    userin = int(input("? "))
     if type(userin) != int:
         print ("INVALID INPUT! Please input an integer")
         exit(1)
