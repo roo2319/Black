@@ -40,7 +40,7 @@ The opcode can range from 0 to 22, the operand 0 to 255 and the exit direction i
 
 ## What is exit direction?
 
-Exit direction is the direction that the program flows. Execution starts in the top right [0,0] and the B value represents which adjacent pixels should be added to the execution queue. It is represented as a one hot encoded value such that 1111 represents WSEN. 
+Exit direction is the direction that the program flows. Execution starts in the top right [0,0] and the B value represents which adjacent pixels should be added to the execution queue. It is represented as a binary encoded value such that 1111 represents WSEN. 
 
 ## Doesn't this all lead to horrible concurrency issues?
 Not if you program around it?
